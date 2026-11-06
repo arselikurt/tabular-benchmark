@@ -89,15 +89,15 @@ We recommend using [Skorch](https://skorch.readthedocs.io/en/stable/net.html) us
 
 ## CS436/536 course project
 
-Arseli Kurt and Furkan Helvaci are reproducing selected results from the [NeurIPS paper](https://proceedings.neurips.cc/paper_files/paper/2022/file/0378c7692da36807bdec87ab043cdadc-Paper-Datasets_and_Benchmarks.pdf) and testing whether a trainable input gate makes the original MLP more robust to irrelevant columns. The project uses [LeoGrin/tabular-benchmark](https://github.com/LeoGrin/tabular-benchmark) at revision `9d54cf5` as its base.
+Arseli Kurt and Furkan Helvaci are reproducing selected results from the [NeurIPS paper](https://proceedings.neurips.cc/paper_files/paper/2022/file/0378c7692da36807bdec87ab043cdadc-Paper-Datasets_and_Benchmarks.pdf) and testing trainable input gates and permutation-based feature screening as ways to make the original MLP more robust to irrelevant columns. The project uses [LeoGrin/tabular-benchmark](https://github.com/LeoGrin/tabular-benchmark) at revision `9d54cf5` as its base.
 
 | Teammate | GitHub account | Workstream to own and verify |
 | --- | --- | --- |
 | Arseli Kurt | [@arselikurt](https://github.com/arselikurt) | Reproduce the clean baselines, review the published comparison, and document the run setup. |
-| Furkan Helvaci | [@furkanhelvaci](https://github.com/furkanhelvaci) | Review and validate the gate implementation, reproduce the noise experiment, and document the findings. |
+| Furkan Helvaci | [@furkanhelvaci](https://github.com/furkanhelvaci) | Independently verify the screening result on house_16H, review the gate comparison, and document the findings. |
 
 The table records planned work. Update the descriptions with completed contributions as each teammate authors and pushes their own changes.
 
-The course additions include a local CPU runner with dataset checksum validation and per-run CSV output, an input-gated version of the original MLP, and paired results for 81 fits. All six reproduced baseline means were within 0.34 percentage points of the published defaults. Random Forest lost 0.82 points at 100% added features, compared with 2.77 for the original MLP and 3.11 for the gated MLP. These results support the noise sensitivity hypothesis on this subset and do not support the proposed gate improvement.
+The course additions include a local CPU runner with dataset checksum validation and per-run CSV output, an input-gated version of the original MLP, and paired results for 81 fits. All six reproduced baseline means were within 0.34 percentage points of the published defaults. Random Forest lost 0.82 points at 100% added features, compared with 2.77 for the original MLP and 3.11 for the gated MLP. These results support the noise sensitivity hypothesis on this subset. The gate did not improve average robustness. In a separate 54-fit follow-up, input screening improved mean test accuracy by 3.39 points at full noise and 0.44 points on clean inputs. All nine full-noise pairs improved.
 
-See the [course workflow](course_project/README.md), [per-run results](course_project/results/runs.csv), [published comparison](course_project/results/reproduction.csv), and [paired noise differences](course_project/results/paired_drops.csv).
+See the [course workflow](course_project/README.md), [per-run results](course_project/results/runs.csv), [published comparison](course_project/results/reproduction.csv), and [paired noise differences](course_project/results/paired_drops.csv), and [paired screening results](course_project/results/screening/paired_accuracy.csv).

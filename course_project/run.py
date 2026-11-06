@@ -26,6 +26,7 @@ from generate_dataset_pipeline import data_to_train_test
 from train import evaluate_model, train_model
 
 from feature_gates import GatedClassifier, GatedMLP
+from screening import select_inputs
 
 DATASETS = {
     'MagicTelescope': (44125, 361065, 22103250, '5c42cddeaee233a285dc8cb6334db6a0', 'class'),
@@ -64,7 +65,7 @@ def load_dataset(name, data_dir):
 
 
 def make_config(model, seed, epochs):
-    upstream_model = 'mlp' if model == 'gated_mlp' else model
+    upstream_model = 'mlp' if model in {'gated_mlp', 'screened_mlp'} else model
     defaults = total_config[upstream_model]['classif']['default']
     config = {key: entry['value'] if 'value' in entry else entry['values'][0]
               for key, entry in defaults.items()}
@@ -96,6 +97,13 @@ def run_dataset(name, args, writer, output):
             for model in args.models:
                 config = make_config(model, seed, args.epochs)
                 data = perturbed
+                mask = np.ones(data[0].shape[1], dtype=bool)
+                screen_seconds = 0.0
+                if model == 'screened_mlp':
+                    start_screen = perf_counter()
+                    mask = select_inputs(data[0], data[3], seed)
+                    data = tuple(features[:, mask] for features in data[:3]) + data[3:]
+                    screen_seconds = perf_counter() - start_screen
                 if model != 'rf':
                     data = gaussienize(*data, type='quantile', rng=np.random.RandomState(seed))
                 x_train, x_val, x_test = (array.astype(np.float32) for array in data[:3])
@@ -114,7 +122,10 @@ def run_dataset(name, args, writer, output):
                 gates = None if model != 'gated_mlp' else fitted.module_.gate_weights().detach().numpy()
                 writer.writerow({
                     'dataset': name, 'task_id': DATASETS[name][1], 'model': model,
-                    'seed': seed, 'noise_pct': noise, 'noise_features': x_train.shape[1] - x.shape[1],
+                    'seed': seed, 'noise_pct': noise, 'noise_features': len(mask) - x.shape[1],
+                    'retained_original_features': int(mask[:x.shape[1]].sum()),
+                    'retained_noise_features': int(mask[x.shape[1]:].sum()),
+                    'screen_seconds': screen_seconds,
                     'train_rows': len(y_train), 'validation_rows': len(y_val), 'test_rows': len(y_test),
                     'test_hash': test_hash, 'epochs': 0 if model == 'rf' else len(fitted.history),
                     'train_accuracy': train_acc, 'validation_accuracy': val_acc,
@@ -129,7 +140,7 @@ def run_dataset(name, args, writer, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--datasets', nargs='+', choices=DATASETS, default=list(DATASETS))
-    parser.add_argument('--models', nargs='+', choices=['rf', 'mlp', 'gated_mlp'],
+    parser.add_argument('--models', nargs='+', choices=['rf', 'mlp', 'gated_mlp', 'screened_mlp'],
                         default=['rf', 'mlp', 'gated_mlp'])
     parser.add_argument('--seeds', nargs='+', type=int, default=[0, 1, 2])
     parser.add_argument('--noise', nargs='+', type=int, choices=[0, 50, 100], default=[0, 50, 100])
@@ -145,7 +156,8 @@ def main():
     torch.set_num_threads(1)
     fields = ['dataset', 'task_id', 'model', 'seed', 'noise_pct', 'noise_features', 'train_rows',
               'validation_rows', 'test_rows', 'test_hash', 'epochs', 'train_accuracy',
-              'validation_accuracy', 'test_accuracy', 'fit_seconds', 'mean_original_gate', 'mean_noise_gate']
+              'validation_accuracy', 'test_accuracy', 'fit_seconds', 'mean_original_gate', 'mean_noise_gate',
+              'retained_original_features', 'retained_noise_features', 'screen_seconds']
     with TemporaryDirectory(prefix='tabular-checkpoints-') as directory:
         original_directory = Path.cwd()
         os.chdir(directory)

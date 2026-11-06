@@ -1,6 +1,6 @@
 # Tabular benchmark course workflow
 
-This study evaluates the original Random Forest and MLP and a numerical MLP with learned input gates. It reuses the original split, noise transform, training, and evaluation functions. The local runner loads the authors’ transformed OpenML data from checksummed ARFF files and runs without a Weights & Biases account.
+This study evaluates the original Random Forest and MLP and two MLP extensions for numerical inputs. It reuses the original split, noise transform, training, and evaluation functions. The local runner loads the authors’ transformed OpenML data from checksummed ARFF files and runs without a Weights & Biases account.
 
 ## Reproduce the runs
 
@@ -45,6 +45,19 @@ We add 0%, 50%, or 100% as many Gaussian features as original columns. The upstr
 - **H2.** The gated MLP loses less test accuracy than the original MLP over the same range.
 
 `results/reproduction.csv` pairs the authors’ default scores with our mean over three splits. `results/paired_drops.csv` compares the clean-to-noisy changes on matching splits. The six published rows were selected by dataset, model, `numerical_classification_medium`, and `hp=default`. The paired changes are descriptive because splits overlap and the study covers three datasets.
+
+## Screening follow-up
+
+[The follow-up protocol](SCREENING_PROTOCOL.md) fixes the permutation screen and the success criteria. The selector learns its mask from the MLP's optimization rows using the maximum mutual information over 64 label shuffles. Both models train with the same settings and the same rows. The follow-up uses seeds 3–5 and the same three datasets.
+
+```sh
+.venv/bin/python -u course_project/run.py --models mlp screened_mlp \
+  --seeds 3 4 5 --noise 0 50 100 --epochs 300 --output output/screening.csv
+.venv/bin/python course_project/summarize_screening.py --runs output/screening.csv \
+  --output output/screening-summary
+```
+
+The [54-run CSV](results/screening/runs.csv) records the test fingerprint and retained features. The [paired table](results/screening/paired_accuracy.csv) compares the original and screened MLP on identical test rows. The [summary](results/screening/summary.json) shows a 3.39-point mean gain at full noise and a 0.44-point gain on clean inputs. Screening removed 155 of 156 injected columns across the nine full-noise fits. These results cover the tested Gaussian noise and numerical tasks.
 
 ## Team checklist
 

@@ -1,0 +1,44 @@
+{
+  "fit_count": 54,
+  "full_noise_gain_pp": 3.38690894194952,
+  "clean_gain_pp": 0.4406672961913747,
+  "full_noise_positive_pairs": 9,
+  "full_noise_removed_injected_columns": 155,
+  "full_noise_injected_columns": 156,
+  "full_noise_removed_original_columns": 29,
+  "h3_supported": true,
+  "by_noise": {
+    "0": {
+      "mlp": 0.8861548214874257,
+      "screened_mlp": 0.8905614944493395,
+      "gain_pp": 0.4406672961913747
+    },
+    "50": {
+      "mlp": 0.8719767391474265,
+      "screened_mlp": 0.8875561596493239,
+      "gain_pp": 1.5579420501897472
+    },
+    "100": {
+      "mlp": 0.8541577138349586,
+      "screened_mlp": 0.8880268032544539,
+      "gain_pp": 3.38690894194952
+    }
+  },
+  "by_dataset_full_noise": {
+    "MagicTelescope": {
+      "mlp": 0.8325029655990509,
+      "screened_mlp": 0.8527876631079478,
+      "gain_pp": 2.028469750889679
+    },
+    "house_16H": {
+      "mlp": 0.8651606071302506,
+      "screened_mlp": 0.878809271679021,
+      "gain_pp": 1.3648664548770413
+    },
+    "pol": {
+      "mlp": 0.8648095687755744,
+      "screened_mlp": 0.9324834749763928,
+      "gain_pp": 6.767390620081841
+    }
+  }
+}
