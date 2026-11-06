@@ -96,7 +96,8 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True,
 
 
 def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True,
-                           categorical_indicator=None, **kwargs):
+                           categorical_indicator=None, module=MLP,
+                           net_class=NeuralNetClassifier, **kwargs):
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -138,8 +139,8 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True,
     if not categorical_indicator is None:
         categorical_indicator = torch.BoolTensor(categorical_indicator)
 
-    mlp_skorch = NeuralNetClassifier(
-        MLP,
+    mlp_skorch = net_class(
+        module,
         # Shuffle training data on each epoch
         criterion=torch.nn.CrossEntropyLoss,
         optimizer=optimizer,
