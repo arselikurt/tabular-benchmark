@@ -1,0 +1,45 @@
+{
+  "fit_count": 81,
+  "clean_accuracy_pct": {
+    "gated_mlp": 88.29562798635205,
+    "mlp": 87.94800118323924,
+    "rf": 90.48687256870873
+  },
+  "mean_drop_pp": {
+    "gated_mlp_drop_pp": 3.1125546628892686,
+    "mlp_drop_pp": 2.7711768879618512,
+    "rf_drop_pp": 0.8172095955857562,
+    "h1_margin_pp": 1.9539672923760945,
+    "h2_margin_pp": -0.3413777749274181
+  },
+  "h1_positive_pairs": 8,
+  "h2_positive_pairs": 4,
+  "by_dataset": {
+    "MagicTelescope": {
+      "gated_mlp_drop_pp": 2.46737841043891,
+      "mlp_drop_pp": 2.3250296559905106,
+      "rf_drop_pp": 0.6287069988137587,
+      "h1_margin_pp": 1.6963226571767518,
+      "h2_margin_pp": -0.1423487544483996
+    },
+    "house_16H": {
+      "gated_mlp_drop_pp": 1.0471820214142873,
+      "mlp_drop_pp": 1.1883751029532874,
+      "rf_drop_pp": 0.847158489234027,
+      "h1_margin_pp": 0.3412166137192603,
+      "h2_margin_pp": 0.1411930815390002
+    },
+    "pol": {
+      "gated_mlp_drop_pp": 5.823103556814609,
+      "mlp_drop_pp": 4.800125904941754,
+      "rf_drop_pp": 0.975763298709483,
+      "h1_margin_pp": 3.8243626062322718,
+      "h2_margin_pp": -1.022977651872855
+    }
+  },
+  "gate_means_full_noise": {
+    "mean_original_gate": 0.9997864722222221,
+    "mean_noise_gate": 0.9753396133333333
+  },
+  "max_abs_reproduction_delta_pp": 0.33214709371292006
+}
