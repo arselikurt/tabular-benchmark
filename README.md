@@ -93,7 +93,7 @@ Arseli Kurt and Furkan Helvaci are reproducing selected results from the [NeurIP
 
 | Teammate | GitHub account | Workstream to own and verify |
 | --- | --- | --- |
-| Arseli Kurt | Pending sign-in | Reproduce the clean baselines, review the published comparison, and document the run setup. |
+| Arseli Kurt | [@arselikurt](https://github.com/arselikurt) | Reproduce the clean baselines, review the published comparison, and document the run setup. |
 | Furkan Helvaci | [@furkanhelvaci](https://github.com/furkanhelvaci) | Review and validate the gate implementation, reproduce the noise experiment, and document the findings. |
 
 The table records planned work. Update the descriptions with completed contributions as each teammate authors and pushes their own changes.
