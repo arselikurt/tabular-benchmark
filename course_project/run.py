@@ -25,13 +25,16 @@ from data_transforms import add_uninformative_features, gaussienize
 from generate_dataset_pipeline import data_to_train_test
 from train import evaluate_model, train_model
 
+from correlated_noise import add_correlated_noise
 from feature_gates import GatedClassifier, GatedMLP
 from screening import select_inputs
 
+BASE_DATASETS = ['MagicTelescope', 'pol', 'house_16H']
 DATASETS = {
     'MagicTelescope': (44125, 361065, 22103250, '5c42cddeaee233a285dc8cb6334db6a0', 'class'),
     'pol': (44122, 361062, 22103247, 'f4c79b9d56e5eaea043a35cab068d2f5', 'binaryClass'),
     'house_16H': (44123, 361063, 22103248, 'f93bc9053ba80a086ff842a903a7d14f', 'binaryClass'),
+    'bank-marketing': (44126, 361066, 22103251, '80d50f9918a49aba6f7ab4dceb817857', 'Class'),
 }
 
 
@@ -92,8 +95,12 @@ def run_dataset(name, args, writer, output):
         split = data_to_train_test(x, y, split_config, split_rng)
         test_hash = hashlib.sha256(split[2].tobytes() + split[5].tobytes()).hexdigest()[:16]
         for noise in args.noise:
-            perturbed = add_uninformative_features(*split, multiplier=1 + noise / 100,
-                                                  rng=np.random.RandomState(1000 + seed))
+            noise_rng = np.random.RandomState(1000 + seed)
+            if args.noise_kind == 'correlated':
+                perturbed = add_correlated_noise(*split, noise_pct=noise, rng=noise_rng)
+            else:
+                perturbed = add_uninformative_features(*split, multiplier=1 + noise / 100,
+                                                      rng=noise_rng)
             for model in args.models:
                 config = make_config(model, seed, args.epochs)
                 data = perturbed
@@ -122,7 +129,7 @@ def run_dataset(name, args, writer, output):
                 gates = None if model != 'gated_mlp' else fitted.module_.gate_weights().detach().numpy()
                 writer.writerow({
                     'dataset': name, 'task_id': DATASETS[name][1], 'model': model,
-                    'seed': seed, 'noise_pct': noise, 'noise_features': len(mask) - x.shape[1],
+                    'seed': seed, 'noise_kind': args.noise_kind, 'noise_pct': noise, 'noise_features': len(mask) - x.shape[1],
                     'retained_original_features': int(mask[:x.shape[1]].sum()),
                     'retained_noise_features': int(mask[x.shape[1]:].sum()),
                     'screen_seconds': screen_seconds,
@@ -139,11 +146,12 @@ def run_dataset(name, args, writer, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--datasets', nargs='+', choices=DATASETS, default=list(DATASETS))
+    parser.add_argument('--datasets', nargs='+', choices=DATASETS, default=BASE_DATASETS)
     parser.add_argument('--models', nargs='+', choices=['rf', 'mlp', 'gated_mlp', 'screened_mlp'],
                         default=['rf', 'mlp', 'gated_mlp'])
     parser.add_argument('--seeds', nargs='+', type=int, default=[0, 1, 2])
     parser.add_argument('--noise', nargs='+', type=int, choices=[0, 50, 100], default=[0, 50, 100])
+    parser.add_argument('--noise-kind', choices=['independent', 'correlated'], default='independent')
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'openml_cache' / 'course_project')
     parser.add_argument('--output', type=Path, required=True)
@@ -154,7 +162,7 @@ def main():
     args.output = args.output.resolve()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     torch.set_num_threads(1)
-    fields = ['dataset', 'task_id', 'model', 'seed', 'noise_pct', 'noise_features', 'train_rows',
+    fields = ['dataset', 'task_id', 'model', 'seed', 'noise_kind', 'noise_pct', 'noise_features', 'train_rows',
               'validation_rows', 'test_rows', 'test_hash', 'epochs', 'train_accuracy',
               'validation_accuracy', 'test_accuracy', 'fit_seconds', 'mean_original_gate', 'mean_noise_gate',
               'retained_original_features', 'retained_noise_features', 'screen_seconds']
